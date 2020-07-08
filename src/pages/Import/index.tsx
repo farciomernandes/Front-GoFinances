@@ -23,19 +23,30 @@ const Import: React.FC = () => {
   const history = useHistory();
 
   async function handleUpload(): Promise<void> {
-    // const data = new FormData();
+    const data = new FormData();
 
-    // TODO
+    if (!uploadedFiles.length) return; // Caso não tenha nenhum arquivo pare a execução aqui
+
+    const file = uploadedFiles[0]; // Caso tenha sido adicionado mais de um ele escolhe o primeiro
+
+    data.append('file', file.file, file.name); // Prepara os dados para serem enviados ao backend
 
     try {
-      // await api.post('/transactions/import', data);
+      await api.post('/transactions/import', data);
+      history.push('/');
     } catch (err) {
-      // console.log(err.response.error);
+      console.log(err.response.error);
     }
   }
 
   function submitFile(files: File[]): void {
-    // TODO
+    const uploadeFiles = files.map(file => ({
+      file,
+      name: file.name,
+      readableSize: filesize(file.size),
+    }));
+
+    setUploadedFiles(uploadeFiles);
   }
 
   return (
@@ -44,8 +55,17 @@ const Import: React.FC = () => {
       <Container>
         <Title>Importar uma transação</Title>
         <ImportFileContainer>
-          <Upload onUpload={submitFile} />
-          {!!uploadedFiles.length && <FileList files={uploadedFiles} />}
+          <Upload
+            onUpload={
+              submitFile /* Verifica se o arquivo é fo formato correto */
+            }
+          />
+
+          {
+            !!uploadedFiles.length && (
+              <FileList files={uploadedFiles} />
+            ) /* Se algum arquivo foi importado ele lista os arquivos */
+          }
 
           <Footer>
             <p>
